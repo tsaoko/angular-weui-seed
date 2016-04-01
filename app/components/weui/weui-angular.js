@@ -133,19 +133,24 @@
 		}
 	]);
 
+	var LOADING_TPL =
+		'<div class="loading-container">' +
+		'<div class="loading">' +
+		'</div>' +
+		'</div>';
+
 	WeuiModule.constant('$weuiToastConfig', {
-		'template': '<i class="weui_icon_toast"></i>'
+		'template': '<div class="weui_toast"><i class="weui_icon_toast"></i><p class="weui_toast_content">已完成</p></div>'
 	});
 
 	WeuiModule.factory('$weuiToast', [
-			'$weuiToastConfig',
-			'$weuiBody',
-			'$weuiTemplateLoader',
-			'$compile',
-			'$timeout',
-			'$q'
-		],
-		function($weuiToastConfig, $weuiBody, $weuiTemplateLoader, $compile, $timeout, $q) {
+		'$weuiBody',
+		'$weuiTemplateLoader',
+		'$weuiToastConfig',
+		'$compile',
+		'$timeout',
+		'$q',
+		function($weuiBody, $weuiTemplateLoader, $weuiToastConfig, $compile, $timeout, $q) {
 
 			var loaderInstance;
 			//default values
@@ -157,18 +162,102 @@
 			};
 
 			function getLoader() {
+				if (!loaderInstance) {
+					loaderInstance = $weuiTemplateLoader.compile({
+							template: LOADING_TPL,
+							appendTo: $weuiBody.get()
+						})
+						.then(function(self) {
+							self.show = function(options) {
+								var templatePromise = options.templateUrl ?
+									$weuiTemplateLoader.load(options.templateUrl) :
+									//options.content: deprecated
+									$q.when(options.template || options.content || '');
 
+								self.scope = options.scope || self.scope;
+
+								if (options.duration) {
+									$timeout.cancel(self.durationTimeout);
+									self.durationTimeout = $timeout(
+										angular.bind(self, self.hide), +options.duration
+									);
+								}
+
+								templatePromise.then(function(html) {
+									if (html) {
+										var loading = self.element.children();
+										loading.html(html);
+										$compile(loading.contents())(self.scope);
+									}
+
+									//Don't show until template changes
+									if (self.isShown) {
+										self.element.addClass('visible');
+										if (self.isShown) {
+											self.element.addClass('active');
+											$weuiBody.addClass('loading-active');
+										}
+									}
+								});
+
+								self.isShown = true;
+							};
+							self.hide = function() {
+
+								if (self.isShown) {
+
+									self.element.removeClass('active');
+									$weuiBody.removeClass('loading-active');
+									self.element.removeClass('visible');
+
+								}
+
+								$timeout.cancel(self.durationTimeout);
+								self.isShown = false;
+								var loading = self.element.children();
+								loading.html("");
+							};
+
+							return self;
+						});
+				}
 				return loaderInstance;
 			}
 
 			function showLoader(options) {
-				//options = extend({}, $weuiLoadingConfig || {}, options || {});
+				options = extend({}, $weuiTemplateLoader || {}, options || {});
+				var delay = options.delay || options.showDelay || 0;
+				$timeout.cancel(loadingShowDelay);
+				loadingShowDelay = $timeout(noop, delay);
+				loadingShowDelay.then(getLoader).then(function(loader) {
+					return loader.show(options);
+				});
+
+				return {
+					hide: function deprecatedHide() {
+						return hideLoader.apply(this, arguments);
+					},
+					show: function deprecatedShow() {
+
+						return showLoader.apply(this, arguments);
+					},
+					setContent: function deprecatedSetContent(content) {
+						return getLoader().then(function(loader) {
+							loader.show({
+								template: content
+							});
+						});
+					}
+				};
 			}
 
 			function hideLoader() {
-
+				$timeout.cancel(loadingShowDelay);
+				getLoader().then(function(loader) {
+					loader.hide();
+				});
 			}
 
 		}
-	);
+	]);
 })();

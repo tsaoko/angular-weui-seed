@@ -7,7 +7,8 @@ angular.module('caoguoApp', [
 	'caoguoApp.home',
 	'caoguoApp.button',
 	'caoguoApp.cell',
-	'caoguoApp.toast'
+	'caoguoApp.toast',
+	'caoguoApp.dialog',
 ]).
 config(['$routeProvider', function($routeProvider) {
 	$routeProvider
@@ -25,5 +26,9 @@ config(['$routeProvider', function($routeProvider) {
 		.when('/toast', {
 			templateUrl: 'toast/toast.html',
 			controller: 'ToastCtrl'
+		})
+		.when('/dialog', {
+			templateUrl: 'dialog/dialog.html',
+			controller: 'DialogCtrl'
 		});
 }]);

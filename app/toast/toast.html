@@ -4,18 +4,10 @@
         <h1 class="page_title">Toast</h1>
     </div>
     <div class="bd spacing">
-        <a href="javascript:;" class="weui_btn weui_btn_primary" id="showToast">点击弹出Toast</a>
-        <a href="javascript:;" class="weui_btn weui_btn_primary" id="showLoadingToast">点击弹出Loading Toast</a>
+        <a href="javascript:;" class="weui_btn weui_btn_primary" ng-click="show()" id="showToast">点击弹出Toast</a>
+        <a href="javascript:;" class="weui_btn weui_btn_primary" ng-click="load()">点击弹出Loading Toast</a>
     </div>
-    <!--BEGIN toast-->
-    <div id="toast">
-        <div class="weui_mask_transparent"></div>
-        <div class="weui_toast">
-            <i class="weui_icon_toast"></i>
-            <p class="weui_toast_content">已完成</p>
-        </div>
-    </div>
-    <!--end toast-->
+
 
     <!-- loading toast -->
     <div id="loadingToast" class="weui_loading_toast" style="display:none;">
