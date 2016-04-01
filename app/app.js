@@ -3,9 +3,11 @@
 // Declare app level module which depends on views, and components
 angular.module('caoguoApp', [
 	'ngRoute',
+	'weui',
 	'caoguoApp.home',
 	'caoguoApp.button',
-	'caoguoApp.cell'
+	'caoguoApp.cell',
+	'caoguoApp.toast'
 ]).
 config(['$routeProvider', function($routeProvider) {
 	$routeProvider
@@ -19,5 +21,9 @@ config(['$routeProvider', function($routeProvider) {
 		.when('/cell', {
 			templateUrl: 'cell/cell.html',
 			controller: 'CellCtrl'
+		})
+		.when('/toast', {
+			templateUrl: 'toast/toast.html',
+			controller: 'ToastCtrl'
 		});
 }]);
